@@ -73,24 +73,34 @@ with open('mappings1.csv', 'r') as csv:
                     # check for regional forms because these are written as Alolan X
                     regionals = ['Alolan', 'Galarian', 'Paldean', 'Hisuian']
                     if splits[0] in regionals:
-                        form = splits[0].lower()
+                        if splits[0] == 'Alolan':
+                            form = 'alola'
+                        elif splits[0] == 'Galarian':
+                            form = 'galar'
+                        elif splits[0] == 'Paldean':
+                            form = 'paldea'
+                        elif splits[0] == 'Hisuian':
+                            form = 'hisui'
+                        else:
+                            form = ''   # won't happen, satisfy type checker
+
                         # check for extra forms
                         all_splits = name.split()
                         if len(all_splits) > 2:
                             if all_splits[-1] == '♀':
-                                form = form + '_female'
+                                form = form + '-female'
                             elif all_splits[-1] == '♂':
-                                form = form + '_male'
+                                form = form + '-male'
                             elif all_splits[-1].lower() == 'mime':
                                 pass
                             else:
-                                form = form + '_' + all_splits[-1].lower()
+                                form = form + '-' + all_splits[-1].lower()
                     else:
                         # determine form by stripping off the species name, which
                         # is assumed to be the first word (or the first two
                         # words)
                         form = name.split(' ', maxsplit=1)[-1].strip().lower()
-                        form = "_".join(form.split())
+                        form = "-".join(form.split())
                         if form == '♀':
                             form = 'female'
                         elif form == '♂':
@@ -101,7 +111,9 @@ with open('mappings1.csv', 'r') as csv:
                             form = 'question'
                     # remove special characters
                     form = re.sub(r'[^a-zA-Z0-9_]', '', form)
-                    output_fname = f"{dex_no_name}_{form}.png"
+                    output_fname = f"{dex_no_name}-{form}.png"
+                    # make female forms default
+                    output_fname = output_fname.replace('-female.png', '.png')
             else:
                 output_fname = f"{dex_no_name}.png"
 
