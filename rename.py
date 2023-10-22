@@ -71,6 +71,9 @@ with open('mappings1.csv', 'r') as csv:
                     # remove special characters
                     form = re.sub(r'[^a-zA-Z0-9_]', '', form)
                     output_fname = f"{dex_no}_{form}.png"
+
+                    # make female forms default
+                    output_fname = output_fname.replace('_female.png', '.png')
             else:
                 output_fname = f"{dex_no}.png"
 
