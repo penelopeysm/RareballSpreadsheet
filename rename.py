@@ -110,7 +110,7 @@ with open('mappings1.csv', 'r') as csv:
                         elif form == '?':
                             form = 'question'
                     # remove special characters
-                    form = re.sub(r'[^a-zA-Z0-9_]', '', form)
+                    form = re.sub(r'[^a-zA-Z0-9_-]', '', form)
                     output_fname = f"{dex_no_name}-{form}.png"
                     # make female forms default
                     output_fname = output_fname.replace('-female.png', '.png')
