@@ -1,5 +1,33 @@
+"""
+NB: To use this script you will need access to my PostgreSQL database
+containing Pokemon data.
+"""
+
 import re
+import os
 from pathlib import Path
+
+import psycopg
+
+DEX_NO_NAMES = {}
+CONN_STRING = os.environ.get('FLY_PG_PROXY_CONN_STRING')
+with psycopg.connect(CONN_STRING) as conn:
+    with conn.cursor() as cur:
+        # Query the database and obtain data as Python objects.
+        cur.execute(f"SELECT DISTINCT (ndex) ndex, name FROM pokemon")
+        names = cur.fetchall()
+        for (ndex, name) in names:
+            if ndex == 669:
+                DEX_NO_NAMES[669] = 'flabebe'
+            elif ndex == 29:
+                DEX_NO_NAMES[29] = 'nidoran-female'
+            elif ndex == 32:
+                DEX_NO_NAMES[32] = 'nidoran-male'
+            else:
+                # standardise names
+                name = '-'.join(name.split()).lower()
+                name = re.sub(r'[^a-zA-Z0-9_-]', '', name)
+                DEX_NO_NAMES[ndex] = name
 
 with open('mappings1.csv', 'r') as csv:
     lines = csv.readlines()
@@ -32,12 +60,15 @@ with open('mappings1.csv', 'r') as csv:
     with open('mappings2.csv', 'w') as csv2:
         # Loop over images renaming them
         for name, img, identifier, dex_no in zip(names, img_fnames, identifiers, dex_nos):
+            # get name corresponding to dex no (from postgres DB)
+            dex_no_name = DEX_NO_NAMES[dex_no]
+
             # check if there are multiple images for this dex number
             if len([d for d in dex_nos if d == dex_no]) > 1:
                 # get the form name
                 splits = name.split(maxsplit=1)
                 if len(splits) == 1:
-                    output_fname = f"{dex_no}.png"   # basic form
+                    output_fname = f"{dex_no_name}.png"   # basic form
                 else:
                     # check for regional forms because these are written as Alolan X
                     regionals = ['Alolan', 'Galarian', 'Paldean', 'Hisuian']
@@ -50,7 +81,7 @@ with open('mappings1.csv', 'r') as csv:
                                 form = form + '_female'
                             elif all_splits[-1] == '♂':
                                 form = form + '_male'
-                            elif all_splits[-1] == 'mime':
+                            elif all_splits[-1].lower() == 'mime':
                                 pass
                             else:
                                 form = form + '_' + all_splits[-1].lower()
@@ -70,9 +101,9 @@ with open('mappings1.csv', 'r') as csv:
                             form = 'question'
                     # remove special characters
                     form = re.sub(r'[^a-zA-Z0-9_]', '', form)
-                    output_fname = f"{dex_no}_{form}.png"
+                    output_fname = f"{dex_no_name}_{form}.png"
             else:
-                output_fname = f"{dex_no}.png"
+                output_fname = f"{dex_no_name}.png"
 
             # rename file
             Path(img).rename(f"original/{output_fname}")
