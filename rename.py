@@ -50,7 +50,7 @@ with open('mappings1.csv', 'r') as csv:
                                 form = form + '_female'
                             elif all_splits[-1] == '♂':
                                 form = form + '_male'
-                            elif all_splits[-1] == 'mime':
+                            elif all_splits[-1].lower() == 'mime':
                                 pass
                             else:
                                 form = form + '_' + all_splits[-1].lower()
